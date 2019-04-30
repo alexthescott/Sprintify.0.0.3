@@ -1,0 +1,3 @@
+rootProject.name = 'spotify-sdk'
+include ':auth-lib'
+include ':auth-sample'
