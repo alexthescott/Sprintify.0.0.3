@@ -72,48 +72,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    /*
-    public void onGetUserProfileClicked(View view) {
-        if (mAccessToken == null) {
-            final Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_main), R.string.warning_need_token, Snackbar.LENGTH_SHORT);
-            snackbar.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.colorAccent));
-            snackbar.show();
-            return;
-        }
-
-        final Request request = new Request.Builder()
-                .url("https://api.spotify.com/v1/me")
-                .addHeader("Authorization","Bearer " + mAccessToken)
-                .build();
-
-        cancelCall();
-        mCall = mOkHttpClient.newCall(request);
-
-        mCall.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d("HTTPClient", e.toString());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    final JSONObject jsonObject = new JSONObject(response.body().string());
-                    Log.d("JsonObject found", jsonObject.toString(3));
-                } catch (JSONException e) {
-                    Log.d("JsonObject","Failed to parse data: " + e);
-                }
-            }
-        });
-    }
-    */
-
-    /*
-    public void onRequestCodeClicked(View view) {
-        final AuthenticationRequest request = getAuthenticationRequest(AuthenticationResponse.Type.CODE);
-        AuthenticationClient.openLoginActivity(this, AUTH_CODE_REQUEST_CODE, request);
-    }
-    */
 
     public void onRequestTokenClicked(View view) {
         Log.d("onRequestTokenClick", "Try to create Auth Request");
@@ -140,11 +98,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d("mAccessToken is empty?", TokenNull.toString());
             successAndLoggedIn(mAccessToken);
         }
-        /*
-        else if (AUTH_CODE_REQUEST_CODE == requestCode) {
-            mAccessCode = response.getCode();
-        }
-        */
     }
 
     private void successAndLoggedIn(String AccessToken) {
