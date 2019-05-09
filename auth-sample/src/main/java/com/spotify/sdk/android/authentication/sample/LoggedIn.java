@@ -7,10 +7,17 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,6 +37,7 @@ public class LoggedIn extends AppCompatActivity {
     List playlistImageURL = new ArrayList();
     List playlistHref = new ArrayList();
     List playlistTrackTotal = new ArrayList();
+    List playlistImages = new ArrayList();
 
     String mAccessToken;
 
@@ -48,9 +56,33 @@ public class LoggedIn extends AppCompatActivity {
 
         new GetPlaylistJson().execute(mAccessToken);
 
-        // Potentially will have to find a way to obtain more playlists
-        // if the user has more than 50 playlists
 
+    }
+
+    private void showPlaylists() {
+        LinearLayout scroll = findViewById(R.id.playlistGallery);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+        // TODO Download Playlist Images
+
+        for(int i = 0; i < numberPlaylists; i++){
+            View view = inflater.inflate(R.layout.itemplaylist, scroll, false);
+
+            TextView playlistTitle = view.findViewById(R.id.playlistTitle);
+            playlistTitle.setText((CharSequence) playlistNames.get(i));
+
+            TextView playlistCount = view.findViewById(R.id.playlistCount);
+            playlistCount.setText((CharSequence) playlistTrackTotal.get(i));
+
+            // TODO Assign Playlist Images
+
+            //ImageView playlistImage = view.findViewById(R.id.playlistImage);
+            //playlistImage.setImageBitmap();
+
+            scroll.addView(view);
+        }
+        PlaylistDialog.dismiss();
     }
 
     private class GetPlaylistJson extends AsyncTask<String, Void, JSONObject> {
@@ -144,8 +176,7 @@ public class LoggedIn extends AppCompatActivity {
                 new GetMorePlaylistJSON().execute(mAccessToken);
             }
             else{ // No more playlists to find
-                PlaylistDialog.dismiss();
-                // TODO: DISPLAY RESULT
+                showPlaylists();
             }
             
         } catch (JSONException e) {
@@ -153,7 +184,6 @@ public class LoggedIn extends AppCompatActivity {
         }
         return null;
     }
-
 
     private class GetMorePlaylistJSON extends AsyncTask<String, Void, JSONObject> {
         OkHttpClient client = new OkHttpClient();
@@ -190,4 +220,5 @@ public class LoggedIn extends AppCompatActivity {
             getPlaylistNames(playlistOBJ);
         }
     }
+
 }
