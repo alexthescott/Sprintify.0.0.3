@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    tools:context=".SkipLoginActivity">
+
+    <LinearLayout
+        android:id="@+id/pregenList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingTop="10dp"
+        android:paddingBottom="20dp">
+
+        <LinearLayout
+            android:id="@+id/bestOfLayout"
+            android:layout_width="match_parent"
+            android:layout_height="62dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginBottom="5dp"
+            android:onClick="onBestOfClicked"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/bestOfImage"
+                android:layout_width="122dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/bestof" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="-10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/bestOfTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginBottom="0dp"
+                    android:maxLines="1"
+                    android:text="Best of Sprintify (163-173 BPM)"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/bestOfCount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:maxLines="1"
+                    android:text="31 tracks"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/bedroomgarbageLayout"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginBottom="5dp"
+            android:onClick="onBedroomClicked"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/bedroomGarbageImage"
+                android:layout_width="122dp"
+                android:layout_height="62dp"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/bedroomgarbage" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/bedroomGarbageTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginBottom="0dp"
+                    android:maxLines="1"
+                    android:text="Bedroom Pop (163-173 BPM ½time)"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/bedroomGarbageCount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:maxLines="1"
+                    android:text="40 tracks"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/psychPopLayout"
+            android:layout_width="match_parent"
+            android:layout_height="59dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginBottom="5dp"
+            android:onClick="onPsychClicked"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/psychPopImage"
+                android:layout_width="122dp"
+                android:layout_height="62dp"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/psychpop" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/psychPopTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginBottom="0dp"
+                    android:maxLines="1"
+                    android:text="Psych Pop (163-173 BPM ½time)"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/psychPopCount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:maxLines="1"
+                    android:text="23 tracks"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/brockHamptonLayout"
+            android:layout_width="match_parent"
+            android:layout_height="59dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginBottom="5dp"
+            android:onClick="onBrockClicked"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/brockHamptonImage"
+                android:layout_width="122dp"
+                android:layout_height="62dp"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/brockhampton" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/brockHamptonTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginBottom="0dp"
+                    android:maxLines="1"
+                    android:text="Brockhampton (163-173 BPM ½time)"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/brockHamptonCount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:maxLines="1"
+                    android:text="26 tracks"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/indiePopLayout"
+            android:layout_width="match_parent"
+            android:layout_height="57dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginBottom="5dp"
+            android:onClick="onIndieClicked"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/indiePopImage"
+                android:layout_width="122dp"
+                android:layout_height="62dp"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/indiepop" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/indiePopTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginBottom="0dp"
+                    android:maxLines="1"
+                    android:text="Indie Pop (163-173 BPM)"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/indiePopCount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:maxLines="1"
+                    android:text="45 tracks"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>

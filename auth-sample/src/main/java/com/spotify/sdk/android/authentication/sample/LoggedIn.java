@@ -3,25 +3,32 @@ package com.spotify.sdk.android.authentication.sample;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -46,25 +53,21 @@ public class LoggedIn extends AppCompatActivity {
 
     int numberOffset;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.setTitle("Sprintify");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
         Intent intent = getIntent();
         mAccessToken = intent.getExtras().getString("Token");
 
         new GetPlaylistJson().execute(mAccessToken);
-
-
     }
 
     private void showPlaylists() {
         LinearLayout scroll = findViewById(R.id.playlistGallery);
 
         LayoutInflater inflater = LayoutInflater.from(this);
-
-        // TODO Download Playlist Images
 
         for(int i = 0; i < numberPlaylists; i++){
             View view = inflater.inflate(R.layout.itemplaylist, scroll, false);
@@ -75,14 +78,55 @@ public class LoggedIn extends AppCompatActivity {
             TextView playlistCount = view.findViewById(R.id.playlistCount);
             playlistCount.setText((CharSequence) playlistTrackTotal.get(i));
 
-            // TODO Assign Playlist Images
+            ImageDownloader imageDownloader = new ImageDownloader();
+            try{
+                ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
+                Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
+                if(outputStream.toByteArray() != null){
+                    byte[] image = outputStream.toByteArray();
+                    Bitmap image2 = BitmapFactory.decodeByteArray(image, 0, image.length);
 
-            //ImageView playlistImage = view.findViewById(R.id.playlistImage);
-            //playlistImage.setImageBitmap();
+                    ImageView playlistImage = view.findViewById(R.id.playlistImage);
+                    playlistImage.setImageBitmap(image2);
+                }
 
-            scroll.addView(view);
+                scroll.addView(view);
+            } catch (ExecutionException e){
+                e.printStackTrace();
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
         }
         PlaylistDialog.dismiss();
+    }
+
+    private class ImageDownloader extends AsyncTask<Integer, Void, ByteArrayOutputStream> {
+
+        @Override
+        protected ByteArrayOutputStream doInBackground(Integer... index) {
+            try {
+                //get URL of images in playlistImageURL
+                URL url = new URL((String) playlistImageURL.get(index[0]));
+
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setConnectTimeout(500);
+                con.setReadTimeout(500);
+                con.setRequestMethod("GET");
+                con.connect();
+                InputStream is = con.getInputStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+
+                return outputStream;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     private class GetPlaylistJson extends AsyncTask<String, Void, JSONObject> {
@@ -91,7 +135,7 @@ public class LoggedIn extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            PlaylistDialog = new ProgressDialog(ctx);
+            PlaylistDialog = new ProgressDialog(ctx, R.style.AppCompatAlertDialogStyle);
             PlaylistDialog.setTitle("Retrieving Playlist");
             PlaylistDialog.setMessage("Loading...");
             PlaylistDialog.show();
@@ -122,6 +166,42 @@ public class LoggedIn extends AppCompatActivity {
             super.onPostExecute(playlistOBJ);
             Log.d("JSON", playlistOBJ.toString());
             getNumberOfPlaylists(playlistOBJ);
+            getPlaylistNames(playlistOBJ);
+        }
+    }
+
+    private class GetMorePlaylistJSON extends AsyncTask<String, Void, JSONObject> {
+        OkHttpClient client = new OkHttpClient();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected JSONObject doInBackground(String... strings) {
+            String mAccessToken = strings[0];
+            String url = "https://api.spotify.com/v1/me/playlists?limit=50&offset=" + numberOffset;
+            final Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization","Bearer " + mAccessToken)
+                    .build();
+            try{
+                Response response = client.newCall(request).execute();
+                String jsonData = response.body().string();
+                JSONObject playlistJson = new JSONObject(jsonData);
+                return playlistJson;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject playlistOBJ) {
+            super.onPostExecute(playlistOBJ);
             getPlaylistNames(playlistOBJ);
         }
     }
@@ -167,7 +247,7 @@ public class LoggedIn extends AppCompatActivity {
                 // Extract snapshot_id
                 // Log.d("snapshot_id", playlists.getString("snapshot_id"));
             }
-            
+
             if(numberPlaylistsLeft > 50){ // more playlists to find
                 Log.d("50+ Playlists", String.valueOf(numberOffset));
 
@@ -178,47 +258,26 @@ public class LoggedIn extends AppCompatActivity {
             else{ // No more playlists to find
                 showPlaylists();
             }
-            
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private class GetMorePlaylistJSON extends AsyncTask<String, Void, JSONObject> {
-        OkHttpClient client = new OkHttpClient();
+    public void openPlaylist(View view) {
+        ViewGroup parent = (ViewGroup) view.getParent();
+        ViewGroup grandParent = (ViewGroup) parent.getParent();
+        int index = grandParent.indexOfChild(parent);
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
 
-        @Override
-        protected JSONObject doInBackground(String... strings) {
-            String mAccessToken = strings[0];
-            String url = "https://api.spotify.com/v1/me/playlists?limit=50&offset=" + numberOffset;
-            final Request request = new Request.Builder()
-                    .url(url)
-                    .addHeader("Authorization","Bearer " + mAccessToken)
-                    .build();
-            try{
-                Response response = client.newCall(request).execute();
-                String jsonData = response.body().string();
-                JSONObject playlistJson = new JSONObject(jsonData);
-                return playlistJson;
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject playlistOBJ) {
-            super.onPostExecute(playlistOBJ);
-            getPlaylistNames(playlistOBJ);
-        }
+        // Toast.makeText(ctx, String.valueOf(playlistNames.get(index)), Toast.LENGTH_SHORT).show();
+        Intent i = new Intent(this, FilterActivity.class);
+        i.putExtra("Token", mAccessToken);
+        i.putExtra("Href", String.valueOf(playlistHref.get(index)));
+        i.putExtra("Name", String.valueOf(playlistNames.get(index)));
+        i.putExtra("Count", String.valueOf(playlistTrackTotal.get(index)));
+        this.startActivity(i);
     }
-
+    
 }

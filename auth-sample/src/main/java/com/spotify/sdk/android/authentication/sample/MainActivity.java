@@ -22,6 +22,8 @@
 package com.spotify.sdk.android.authentication.sample;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -44,6 +46,7 @@ import java.util.Locale;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Connection;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -55,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     public static final int AUTH_CODE_REQUEST_CODE = 0x11;
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
+    ConnectivityManager connectivityManager;
+    NetworkInfo networkInfo;
     private String mAccessToken;
     private String mAccessCode;
     private Call mCall;
@@ -74,9 +79,22 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void onRequestTokenClicked(View view) {
-        Log.d("onRequestTokenClick", "Try to create Auth Request");
-        final AuthenticationRequest request = getAuthenticationRequest(AuthenticationResponse.Type.TOKEN);
-        AuthenticationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
+        connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        networkInfo = connectivityManager.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            Log.d("onRequestTokenClick", "Try to create Auth Request");
+            final AuthenticationRequest request = getAuthenticationRequest(AuthenticationResponse.Type.TOKEN);
+            AuthenticationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
+        } else {
+            final Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_main), R.string.warning_need_internet, Snackbar.LENGTH_SHORT);
+            snackbar.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.colorAccent));
+            snackbar.show();
+        }
+    }
+
+    public void onLoginSkipped(View view){
+        Intent intent = new Intent(this, SkipLoginActivity.class);
+        startActivity(intent);
     }
 
     private AuthenticationRequest getAuthenticationRequest(AuthenticationResponse.Type type) {
