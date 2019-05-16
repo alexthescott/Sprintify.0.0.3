@@ -4,7 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +14,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -205,7 +206,7 @@ public class FilterActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
+;
     private class requestBPM extends AsyncTask<List, Void, List>{
         OkHttpClient client = new OkHttpClient();
 
@@ -254,6 +255,14 @@ public class FilterActivity extends AppCompatActivity {
                             }
                         }
                         /*
+
+                        // Lol let's comment this out
+                        // and see if the app crashes
+                        // if not get rid of else bit
+                        // because i'm a meme 5/15/19
+                        //         - Alex
+
+
                         else{ // In Case no Features found
                             Log.d("FAILED", "No Audio Features");
                             // SINGLE REQUEST
@@ -293,32 +302,39 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void displayTracks() {
+        ScrollView filterScroll = findViewById(R.id.trackScroll);
+        filterScroll.setVisibility(View.VISIBLE);
         LinearLayout scroll = findViewById(R.id.trackGallery);
-        scroll.setVisibility(View.VISIBLE);
 
-        LayoutInflater inflater = LayoutInflater.from(this);
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
 
         int size = filteredTrackIds.size();
 
+        Log.d("SIZE", String.valueOf(size));
+
         for(int i = 0; i < size; i++){
             // Log.d("display object" + i, String.valueOf(filteredBPMs.get(i)) + " "+ String.valueOf(filteredTrackIds.get(i)));
-            View view = inflater.inflate(R.layout.itemplaylist, scroll, false);
+            View view = layoutInflater.inflate(R.layout.itemtrack, scroll, false);
 
-            TextView playlistTitle = view.findViewById(R.id.playlistTitle);
-            playlistTitle.setText((CharSequence) filteredTrackIds.get(i));
+            TextView playlistTitle = view.findViewById(R.id.tracktitle);
+            playlistTitle.setText((CharSequence) filteredTrackName.get(i));
+            Log.d("track " + i, String.valueOf(filteredTrackName.get(i)));
 
-            TextView playlistCount = view.findViewById(R.id.playlistCount);
+            TextView playlistCount = view.findViewById(R.id.trackBPM);
             playlistCount.setText(String.valueOf(filteredBPMs.get(i)));
 
             scroll.addView(view);
         }
+
+        FloatingActionButton fab = findViewById(R.id.floatingActionButton);
+        // fab.setVisibility(View.VISIBLE);
+
         double percentfound =  100 * ((double) size / (double) Count);
         Log.d("Percent Found", String.valueOf(percentfound ));
         Toast.makeText(ctx, "Found " + size + " songs, " + percentfound + "% are in range", Toast.LENGTH_LONG).show();
 
         double percentSeen = 100 * ((double) seen / (double) Count);
         Log.d("Percent Looked At", String.valueOf(percentSeen));
-
     }
 
 }

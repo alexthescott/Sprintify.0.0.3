@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -75,7 +74,7 @@ public class LoggedIn extends AppCompatActivity {
             TextView playlistTitle = view.findViewById(R.id.playlistTitle);
             playlistTitle.setText((CharSequence) playlistNames.get(i));
 
-            TextView playlistCount = view.findViewById(R.id.playlistCount);
+            TextView playlistCount = view.findViewById(R.id.trackBPM);
             playlistCount.setText((CharSequence) playlistTrackTotal.get(i));
 
             ImageDownloader imageDownloader = new ImageDownloader();
