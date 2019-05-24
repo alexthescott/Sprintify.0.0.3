@@ -43,13 +43,13 @@ public class LoggedIn extends AppCompatActivity {
     List playlistImageURL = new ArrayList();
     List playlistHref = new ArrayList();
     List playlistTrackTotal = new ArrayList();
-    List playlistImages = new ArrayList();
+    List playlistId = new ArrayList();
 
     String mAccessToken;
+    String userID;
 
     int numberPlaylists;
     int numberPlaylistsLeft;
-
     int numberOffset;
 
     @Override
@@ -61,6 +61,7 @@ public class LoggedIn extends AppCompatActivity {
         mAccessToken = intent.getExtras().getString("Token");
 
         new GetPlaylistJson().execute(mAccessToken);
+        new getUserID().execute(mAccessToken);
     }
 
     private void showPlaylists() {
@@ -108,8 +109,8 @@ public class LoggedIn extends AppCompatActivity {
                 URL url = new URL((String) playlistImageURL.get(index[0]));
 
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setConnectTimeout(500);
-                con.setReadTimeout(500);
+                con.setConnectTimeout(1000);
+                con.setReadTimeout(1000);
                 con.setRequestMethod("GET");
                 con.connect();
                 InputStream is = con.getInputStream();
@@ -128,8 +129,46 @@ public class LoggedIn extends AppCompatActivity {
         }
     }
 
-    private class GetPlaylistJson extends AsyncTask<String, Void, JSONObject> {
+    private class getUserID extends AsyncTask<String, Void, JSONObject> {
         OkHttpClient client = new OkHttpClient();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected JSONObject doInBackground(String... strings) {
+            mAccessToken = strings[0];
+            OkHttpClient client =  new OkHttpClient();
+            final Request request = new Request.Builder()
+                    .url("https://api.spotify.com/v1/me")
+                    .addHeader("Authorization", "Bearer " + mAccessToken)
+                    .build();
+            try{
+                Response response = client.newCall(request).execute();
+                String jsonData = response.body().string();
+                JSONObject userJson = new JSONObject(jsonData);
+                return userJson;
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject userObj) {
+            super.onPostExecute(userObj);
+            try {
+                userID = userObj.getString("id");
+                Log.d("userID", userID);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class GetPlaylistJson extends AsyncTask<String, Void, JSONObject> {
 
         @Override
         protected void onPreExecute() {
@@ -142,6 +181,7 @@ public class LoggedIn extends AppCompatActivity {
 
         @Override
         protected JSONObject doInBackground(String... strings) {
+            OkHttpClient client = new OkHttpClient();
             String mAccessToken = strings[0];
             final Request request = new Request.Builder()
                     .url("https://api.spotify.com/v1/me/playlists?limit=50")
@@ -226,6 +266,10 @@ public class LoggedIn extends AppCompatActivity {
             for(int i = 0; i < 50 && i < numberPlaylistsLeft; i++){
                 JSONObject playlists = items.getJSONObject(i);
 
+                // Extract ID
+                Log.d("ID", playlists.getString("id"));
+                playlistId.add(playlists.getString("id"));
+
                 // Extract Name
                 Log.d("Name:", playlists.getString("name"));
                 playlistNames.add(playlists.getString("name"));
@@ -276,6 +320,7 @@ public class LoggedIn extends AppCompatActivity {
         i.putExtra("Href", String.valueOf(playlistHref.get(index)));
         i.putExtra("Name", String.valueOf(playlistNames.get(index)));
         i.putExtra("Count", String.valueOf(playlistTrackTotal.get(index)));
+        i.putExtra("userID", userID);
         this.startActivity(i);
     }
     

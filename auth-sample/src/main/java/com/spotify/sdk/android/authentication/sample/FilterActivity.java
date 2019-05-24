@@ -4,9 +4,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,11 +32,13 @@ import okhttp3.Response;
 
 public class FilterActivity extends AppCompatActivity {
     ProgressDialog PlaylistDialog;
+    FloatingActionButton fab;
     Context ctx = FilterActivity.this;
 
     String mAccessToken;
     String Href;
     String Name;
+    String userId;
 
     int min;
     int max;
@@ -63,8 +65,12 @@ public class FilterActivity extends AppCompatActivity {
         Href = intent.getExtras().getString("Href");
         Name = intent.getExtras().getString("Name");
         Count = Integer.valueOf(intent.getExtras().getString("Count"));
+        userId = intent.getExtras().getString("userId");
         CountLeft = Count;
         this.setTitle(Name);
+
+        fab = findViewById(R.id.floatingActionButton);
+        fab.hide();
     }
 
     public void filterPlaylist(View view) {
@@ -87,6 +93,10 @@ public class FilterActivity extends AppCompatActivity {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    public void createPlaylist(View view) {
+
     }
 
     // Get List of Tracks & insert into trackID
@@ -206,7 +216,7 @@ public class FilterActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-;
+
     private class requestBPM extends AsyncTask<List, Void, List>{
         OkHttpClient client = new OkHttpClient();
 
@@ -293,14 +303,17 @@ public class FilterActivity extends AppCompatActivity {
             return null;
         }
 
+        // dismiss ProgressDialog, display tracks, show FAB
         @Override
         protected void onPostExecute(List tracksOBJ) {
             super.onPostExecute(tracksOBJ);
             PlaylistDialog.dismiss();
             displayTracks();
+            fab.show();
         }
     }
 
+    // Called after async Filter function
     private void displayTracks() {
         ScrollView filterScroll = findViewById(R.id.trackScroll);
         filterScroll.setVisibility(View.VISIBLE);
@@ -326,15 +339,14 @@ public class FilterActivity extends AppCompatActivity {
             scroll.addView(view);
         }
 
-        FloatingActionButton fab = findViewById(R.id.floatingActionButton);
-        // fab.setVisibility(View.VISIBLE);
-
         double percentfound =  100 * ((double) size / (double) Count);
         Log.d("Percent Found", String.valueOf(percentfound ));
         Toast.makeText(ctx, "Found " + size + " songs, " + percentfound + "% are in range", Toast.LENGTH_LONG).show();
 
         double percentSeen = 100 * ((double) seen / (double) Count);
         Log.d("Percent Looked At", String.valueOf(percentSeen));
+
+
     }
 
 }
