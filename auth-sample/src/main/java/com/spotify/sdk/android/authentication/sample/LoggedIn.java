@@ -35,6 +35,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class LoggedIn extends AppCompatActivity {
+    PlaylistDB playlistDB;
     Context ctx = LoggedIn.this;
     ProgressDialog PlaylistDialog;
 
@@ -57,6 +58,7 @@ public class LoggedIn extends AppCompatActivity {
         this.setTitle("Sprintify");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
+        playlistDB = new PlaylistDB(this, "IMAGE_DATABASE", null, 1);
         Intent intent = getIntent();
         mAccessToken = intent.getExtras().getString("Token");
 
