@@ -1,7 +1,7 @@
 ###### To-Do:  
 ##	Hot:    
-      1. post generate new playlist interface (reordering, audio preview, remove songs, display song length)
-      2. create new playlist on account post filter
+      1. create new playlist on account post filter
+      2. post generate new playlist interface (reordering, audio preview, remove songs, display song length)
       3. build a database for every "seen" song
 
 ##  Medium:    
