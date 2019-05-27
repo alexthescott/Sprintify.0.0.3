@@ -3,6 +3,8 @@ package com.spotify.sdk.android.authentication.sample;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -22,9 +25,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -51,10 +60,12 @@ public class FilterActivity extends AppCompatActivity {
 
     List trackID = new ArrayList();
     List trackName = new ArrayList();
+    List trackImageURL = new ArrayList();
 
     List filteredTrackIds = new ArrayList();
     List filteredBPMs = new ArrayList();
     List filteredTrackName = new ArrayList();
+    List filterTrackImageURL = new ArrayList();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -210,6 +221,7 @@ public class FilterActivity extends AppCompatActivity {
                 JSONObject trackInfo = track.getJSONObject("track");
                 trackID.add(trackInfo.getString("id"));
                 trackName.add(trackInfo.getString("name"));
+                trackImageURL.add(trackInfo.getJSONObject("album").getJSONArray("images").getJSONObject(0).getString("url"));
                 // Log.d("trackID " + (i + CountOffset), trackInfo.getString("id"));
             }
         } catch (JSONException e) {
@@ -255,6 +267,7 @@ public class FilterActivity extends AppCompatActivity {
                                         filteredBPMs.add(trackBPM);
                                         filteredTrackIds.add(trackID.get(j));
                                         filteredTrackName.add(trackName.get(j));
+                                        filterTrackImageURL.add(trackImageURL.get(j));
 
                                         Log.d(trackName.get(j) + " is " + j , String.valueOf(trackBPM));
                                     }
@@ -336,7 +349,24 @@ public class FilterActivity extends AppCompatActivity {
             TextView playlistCount = view.findViewById(R.id.trackBPM);
             playlistCount.setText(String.valueOf(filteredBPMs.get(i)));
 
-            scroll.addView(view);
+            ImageDownloader imageDownloader = new ImageDownloader();
+            try {
+                ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
+                Log.d("TrackTitle", String.valueOf(filteredTrackName.get(i)));
+                if (outputStream.toByteArray() != null) {
+                    byte[] imageByte = outputStream.toByteArray();
+                    Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+
+                    ImageView playlistImage = view.findViewById(R.id.trackItemImage);
+                    playlistImage.setImageBitmap(image);
+                }
+
+                scroll.addView(view);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         double percentfound =  100 * ((double) size / (double) Count);
@@ -345,8 +375,34 @@ public class FilterActivity extends AppCompatActivity {
 
         double percentSeen = 100 * ((double) seen / (double) Count);
         Log.d("Percent Looked At", String.valueOf(percentSeen));
-
-
     }
 
+    private class ImageDownloader extends AsyncTask<Integer, Void, ByteArrayOutputStream> {
+
+        @Override
+        protected ByteArrayOutputStream doInBackground(Integer... index) {
+            try {
+                //get URL of images in filterTrackImageURL
+                URL url = new URL((String) filterTrackImageURL.get(index[0]));
+
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setConnectTimeout(1000);
+                con.setReadTimeout(1000);
+                con.setRequestMethod("GET");
+                con.connect();
+                InputStream is = con.getInputStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+
+                return outputStream;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
 }

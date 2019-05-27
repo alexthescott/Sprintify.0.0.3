@@ -45,6 +45,7 @@ public class LoggedIn extends AppCompatActivity {
     List playlistHref = new ArrayList();
     List playlistTrackTotal = new ArrayList();
     List playlistId = new ArrayList();
+    List playlistSnap = new ArrayList();
 
     String mAccessToken;
     String userID;
@@ -80,23 +81,54 @@ public class LoggedIn extends AppCompatActivity {
             TextView playlistCount = view.findViewById(R.id.trackBPM);
             playlistCount.setText((CharSequence) playlistTrackTotal.get(i));
 
-            ImageDownloader imageDownloader = new ImageDownloader();
-            try{
-                ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
-                Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
-                if(outputStream.toByteArray() != null){
-                    byte[] image = outputStream.toByteArray();
-                    Bitmap image2 = BitmapFactory.decodeByteArray(image, 0, image.length);
+            if (!(playlistDB.checkID((String) playlistId.get(i)))) {
+                ImageDownloader imageDownloader = new ImageDownloader();
+                try {
+                    ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
+                    Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
+                    if (outputStream.toByteArray() != null) {
+                        byte[] imageByte = outputStream.toByteArray();
+                        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
 
-                    ImageView playlistImage = view.findViewById(R.id.playlistImage);
-                    playlistImage.setImageBitmap(image2);
+                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
+                        playlistImage.setImageBitmap(image);
+                        playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
+                    }
+
+                    scroll.addView(view);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+            } else if (!(playlistDB.checkSnap((String) playlistId.get(i), (String) playlistSnap.get(i)))) {
+                ImageDownloader imageDownloader = new ImageDownloader();
+                try {
+                    ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
+                    Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
+                    if (outputStream.toByteArray() != null) {
+                        byte[] imageByte = outputStream.toByteArray();
+                        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+
+                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
+                        playlistImage.setImageBitmap(image);
+                        playlistDB.delete((String) playlistId.get(i));
+                        playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
+                    }
+
+                    scroll.addView(view);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                ImageView playlistImage = view.findViewById(R.id.playlistImage);
+                byte[] imageByte = playlistDB.getIMGByte((String) playlistId.get(i));
+                Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+                playlistImage.setImageBitmap(image);
 
                 scroll.addView(view);
-            } catch (ExecutionException e){
-                e.printStackTrace();
-            } catch (InterruptedException e){
-                e.printStackTrace();
             }
         }
         PlaylistDialog.dismiss();
@@ -272,6 +304,10 @@ public class LoggedIn extends AppCompatActivity {
                 Log.d("ID", playlists.getString("id"));
                 playlistId.add(playlists.getString("id"));
 
+                // Extract snapshot_id
+                Log.d("snapshot_id", playlists.getString("snapshot_id"));
+                playlistSnap.add(playlists.getString("snapshot_id"));
+
                 // Extract Name
                 Log.d("Name:", playlists.getString("name"));
                 playlistNames.add(playlists.getString("name"));
@@ -288,9 +324,6 @@ public class LoggedIn extends AppCompatActivity {
                 String imageUrl = playlists.getJSONArray("images").getJSONObject(0).getString("url");
                 Log.d("Image URL",imageUrl);
                 playlistImageURL.add(imageUrl);
-
-                // Extract snapshot_id
-                // Log.d("snapshot_id", playlists.getString("snapshot_id"));
             }
 
             if(numberPlaylistsLeft > 50){ // more playlists to find
