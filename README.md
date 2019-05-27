@@ -1,14 +1,12 @@
 ###### To-Do:  
 ##	Hot:    
-      1. post generate new playlist interface (reordering, audio preview, remove songs, display song length)
-      2. create new playlist on account post filter
-      3. playlist image database (with insert and update data)
-      4. download and display track images
+      1. create new playlist on account post filter
+      2. post generate new playlist interface (reordering, audio preview, remove songs, display song length)
+      3. build a database for every "seen" song
 
-##  Medium:  
-      1. build a database for every "seen" song  
-      2. hamburger menu to add logout and settings
-      3. generate brand new playlist feature
+##  Medium:    
+      1. hamburger menu to add logout and settings
+      2. generate brand new playlist feature
       
 ##  Mild:  
       1. refresh button in action bar to check if new playlists are made    
