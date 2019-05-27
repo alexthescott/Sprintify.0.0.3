@@ -2,8 +2,7 @@
 ##	Hot:    
       1. post generate new playlist interface (reordering, audio preview, remove songs, display song length)
       2. create new playlist on account post filter
-      3. playlist image database (with insert and update data)
-      4. download and display track images
+      3. download and display track images
 
 ##  Medium:  
       1. build a database for every "seen" song  
