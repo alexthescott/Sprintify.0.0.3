@@ -43,6 +43,7 @@ public class FilterActivity extends AppCompatActivity {
     ProgressDialog PlaylistDialog;
     FloatingActionButton fab;
     Context ctx = FilterActivity.this;
+    TrackDB trackDB;
 
     String mAccessToken;
     String Href;
@@ -71,6 +72,7 @@ public class FilterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
+        trackDB = new TrackDB(this, "TRACK_IMAGE_DATABASE", null, 1);
         Intent intent = getIntent();
         mAccessToken = intent.getExtras().getString("Token");
         Href = intent.getExtras().getString("Href");
@@ -222,7 +224,24 @@ public class FilterActivity extends AppCompatActivity {
                 trackID.add(trackInfo.getString("id"));
                 trackName.add(trackInfo.getString("name"));
                 trackImageURL.add(trackInfo.getJSONObject("album").getJSONArray("images").getJSONObject(0).getString("url"));
-                // Log.d("trackID " + (i + CountOffset), trackInfo.getString("id"));
+
+                if (!(trackDB.checkID((String) trackID.get(i)))) {
+                    ImageDownloader imageDownloader = new ImageDownloader();
+                    try {
+                        ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
+                        Log.d("TrackTitle", String.valueOf(trackName.get(i)));
+                        if (outputStream.toByteArray() != null) {
+                            byte[] imageByte = outputStream.toByteArray();
+
+                            trackDB.insert((String) trackID.get(i), (String) trackImageURL.get(i), imageByte);
+                        }
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    // Log.d("trackID " + (i + CountOffset), trackInfo.getString("id"));
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -349,24 +368,12 @@ public class FilterActivity extends AppCompatActivity {
             TextView playlistCount = view.findViewById(R.id.trackBPM);
             playlistCount.setText(String.valueOf(filteredBPMs.get(i)));
 
-            ImageDownloader imageDownloader = new ImageDownloader();
-            try {
-                ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
-                Log.d("TrackTitle", String.valueOf(filteredTrackName.get(i)));
-                if (outputStream.toByteArray() != null) {
-                    byte[] imageByte = outputStream.toByteArray();
-                    Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+            byte[] imageByte = trackDB.getIMGByte((String) filteredTrackIds.get(i));
+            Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+            ImageView playlistImage = view.findViewById(R.id.trackItemImage);
+            playlistImage.setImageBitmap(image);
 
-                    ImageView playlistImage = view.findViewById(R.id.trackItemImage);
-                    playlistImage.setImageBitmap(image);
-                }
-
-                scroll.addView(view);
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            scroll.addView(view);
         }
 
         double percentfound =  100 * ((double) size / (double) Count);
@@ -383,7 +390,7 @@ public class FilterActivity extends AppCompatActivity {
         protected ByteArrayOutputStream doInBackground(Integer... index) {
             try {
                 //get URL of images in filterTrackImageURL
-                URL url = new URL((String) filterTrackImageURL.get(index[0]));
+                URL url = new URL((String) trackImageURL.get(index[0]));
 
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setConnectTimeout(1000);
