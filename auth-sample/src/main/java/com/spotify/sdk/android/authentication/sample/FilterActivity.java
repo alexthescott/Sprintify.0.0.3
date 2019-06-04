@@ -46,6 +46,7 @@ public class FilterActivity extends AppCompatActivity {
     FloatingActionButton fab;
     Context ctx = FilterActivity.this;
     TrackDB trackDB;
+    TrackAdapter trackAdapter;
 
     String mAccessToken;
     String Href;
@@ -85,7 +86,7 @@ public class FilterActivity extends AppCompatActivity {
         this.setTitle(Name);
 
         fab = findViewById(R.id.floatingActionButton);
-        fab.setImageResource(R.drawable.icon_add_white6);
+        fab.setImageResource(R.drawable.icon_add_white);
         fab.hide();
     }
 
@@ -112,6 +113,8 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     public void createPlaylist(View view) {
+        List filteredIds = trackAdapter.returnIds();
+        Log.d("filteredIDS", String.valueOf(filteredIds));
 
     }
 
@@ -362,7 +365,7 @@ public class FilterActivity extends AppCompatActivity {
 
         Log.d("SIZE", String.valueOf(size));
 
-        TrackAdapter trackAdapter = new TrackAdapter(FilterActivity.this, filteredTrackName, filteredBPMs, filteredTrackIds);
+        trackAdapter = new TrackAdapter(FilterActivity.this, filteredTrackName, filteredBPMs, filteredTrackIds);
         RecyclerView recyclerView = findViewById(R.id.track_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(trackAdapter);

@@ -65,4 +65,8 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackHolder>
             trackImage = itemView.findViewById(R.id.trackItemImage);
         }
     }
+
+    public List returnIds(){
+        return trackIds;
+    }
 }
