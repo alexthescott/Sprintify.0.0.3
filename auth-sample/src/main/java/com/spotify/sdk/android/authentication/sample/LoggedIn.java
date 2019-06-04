@@ -67,141 +67,6 @@ public class LoggedIn extends AppCompatActivity {
         new getUserID().execute(mAccessToken);
     }
 
-    private void showPlaylists() {
-        LinearLayout scroll = findViewById(R.id.playlistGallery);
-
-        LayoutInflater inflater = LayoutInflater.from(this);
-
-        for(int i = 0; i < numberPlaylists; i++){
-            View view = inflater.inflate(R.layout.itemplaylist, scroll, false);
-
-            TextView playlistTitle = view.findViewById(R.id.playlistTitle);
-            playlistTitle.setText((CharSequence) playlistNames.get(i));
-
-            TextView playlistCount = view.findViewById(R.id.trackBPM);
-            playlistCount.setText((CharSequence) playlistTrackTotal.get(i));
-
-            if (!(playlistDB.checkID((String) playlistId.get(i)))) {
-                ImageDownloader imageDownloader = new ImageDownloader();
-                try {
-                    ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
-                    Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
-                    if (outputStream.toByteArray() != null) {
-                        byte[] imageByte = outputStream.toByteArray();
-                        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-
-                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
-                        playlistImage.setImageBitmap(image);
-                        playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
-                    }
-
-                    scroll.addView(view);
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else if (!(playlistDB.checkSnap((String) playlistId.get(i), (String) playlistSnap.get(i)))) {
-                ImageDownloader imageDownloader = new ImageDownloader();
-                try {
-                    ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
-                    Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
-                    if (outputStream.toByteArray() != null) {
-                        byte[] imageByte = outputStream.toByteArray();
-                        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-
-                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
-                        playlistImage.setImageBitmap(image);
-                        playlistDB.delete((String) playlistId.get(i));
-                        playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
-                    }
-
-                    scroll.addView(view);
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                ImageView playlistImage = view.findViewById(R.id.playlistImage);
-                byte[] imageByte = playlistDB.getIMGByte((String) playlistId.get(i));
-                Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                playlistImage.setImageBitmap(image);
-
-                scroll.addView(view);
-            }
-        }
-        PlaylistDialog.dismiss();
-    }
-
-    private class ImageDownloader extends AsyncTask<Integer, Void, ByteArrayOutputStream> {
-
-        @Override
-        protected ByteArrayOutputStream doInBackground(Integer... index) {
-            try {
-                //get URL of images in playlistImageURL
-                URL url = new URL((String) playlistImageURL.get(index[0]));
-
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setConnectTimeout(1000);
-                con.setReadTimeout(1000);
-                con.setRequestMethod("GET");
-                con.connect();
-                InputStream is = con.getInputStream();
-                Bitmap bitmap = BitmapFactory.decodeStream(is);
-
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
-
-                return outputStream;
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
-
-    private class getUserID extends AsyncTask<String, Void, JSONObject> {
-        OkHttpClient client = new OkHttpClient();
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected JSONObject doInBackground(String... strings) {
-            mAccessToken = strings[0];
-            OkHttpClient client =  new OkHttpClient();
-            final Request request = new Request.Builder()
-                    .url("https://api.spotify.com/v1/me")
-                    .addHeader("Authorization", "Bearer " + mAccessToken)
-                    .build();
-            try{
-                Response response = client.newCall(request).execute();
-                String jsonData = response.body().string();
-                JSONObject userJson = new JSONObject(jsonData);
-                return userJson;
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject userObj) {
-            super.onPostExecute(userObj);
-            try {
-                userID = userObj.getString("id");
-                Log.d("userID", userID);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     private class GetPlaylistJson extends AsyncTask<String, Void, JSONObject> {
 
         @Override
@@ -277,6 +142,144 @@ public class LoggedIn extends AppCompatActivity {
             super.onPostExecute(playlistOBJ);
             getPlaylistNames(playlistOBJ);
         }
+    }
+
+    private class getUserID extends AsyncTask<String, Void, JSONObject> {
+        OkHttpClient client = new OkHttpClient();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected JSONObject doInBackground(String... strings) {
+            mAccessToken = strings[0];
+            OkHttpClient client =  new OkHttpClient();
+            final Request request = new Request.Builder()
+                    .url("https://api.spotify.com/v1/me")
+                    .addHeader("Authorization", "Bearer " + mAccessToken)
+                    .build();
+            try{
+                Response response = client.newCall(request).execute();
+                String jsonData = response.body().string();
+                JSONObject userJson = new JSONObject(jsonData);
+                return userJson;
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject userObj) {
+            super.onPostExecute(userObj);
+            try {
+                userID = userObj.getString("id");
+                Log.d("userID", userID);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class ImageDownloader extends AsyncTask<Integer, Void, ByteArrayOutputStream> {
+
+        @Override
+        protected ByteArrayOutputStream doInBackground(Integer... index) {
+            try {
+                //get URL of images in playlistImageURL
+                URL url = new URL((String) playlistImageURL.get(index[0]));
+
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setConnectTimeout(1000);
+                con.setReadTimeout(1000);
+                con.setRequestMethod("GET");
+                con.connect();
+                InputStream is = con.getInputStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+
+                return outputStream;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    private void showPlaylists() {
+        LinearLayout scroll = findViewById(R.id.playlistGallery);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+        for(int i = 0; i < numberPlaylists; i++){
+            View view = inflater.inflate(R.layout.itemplaylist, scroll, false);
+
+            TextView playlistTitle = view.findViewById(R.id.playlistTitle);
+            playlistTitle.setText((CharSequence) playlistNames.get(i));
+
+            TextView playlistCount = view.findViewById(R.id.trackBPM);
+            playlistCount.setText((CharSequence) playlistTrackTotal.get(i));
+
+            // playlist not in DataBase
+            if (!(playlistDB.checkID((String) playlistId.get(i)))) {
+                ImageDownloader imageDownloader = new ImageDownloader();
+                try {
+                    ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
+                    Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
+                    if (outputStream.toByteArray() != null) {
+                        byte[] imageByte = outputStream.toByteArray();
+                        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+
+                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
+                        playlistImage.setImageBitmap(image);
+                        playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
+                    }
+                    scroll.addView(view);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                // playlist
+            } else if (!(playlistDB.checkSnap((String) playlistId.get(i), (String) playlistSnap.get(i)))) {
+                ImageDownloader imageDownloader = new ImageDownloader();
+                try {
+                    ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
+                    Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
+                    if (outputStream.toByteArray() != null) {
+                        byte[] imageByte = outputStream.toByteArray();
+                        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+
+                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
+                        playlistImage.setImageBitmap(image);
+                        playlistDB.delete((String) playlistId.get(i));
+                        playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
+                    }
+
+                    scroll.addView(view);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                // Playlist Found
+            } else {
+                Log.d("playlistDB", "retreiving " + playlistNames.get(i) + " photo from database");
+                ImageView playlistImage = view.findViewById(R.id.playlistImage);
+                byte[] imageByte = playlistDB.getIMGByte((String) playlistId.get(i));
+                Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+                playlistImage.setImageBitmap(image);
+                scroll.addView(view);
+            }
+        }
+        PlaylistDialog.dismiss();
     }
 
     private void getNumberOfPlaylists(JSONObject playlistOBJ) {

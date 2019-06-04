@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -83,6 +85,7 @@ public class FilterActivity extends AppCompatActivity {
         this.setTitle(Name);
 
         fab = findViewById(R.id.floatingActionButton);
+        fab.setImageResource(R.drawable.icon_add_white6);
         fab.hide();
     }
 
@@ -223,7 +226,7 @@ public class FilterActivity extends AppCompatActivity {
                 JSONObject trackInfo = track.getJSONObject("track");
                 trackID.add(trackInfo.getString("id"));
                 trackName.add(trackInfo.getString("name"));
-                trackImageURL.add(trackInfo.getJSONObject("album").getJSONArray("images").getJSONObject(0).getString("url"));
+                trackImageURL.add(trackInfo.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"));
 
                 if (!(trackDB.checkID((String) trackID.get(i)))) {
                     ImageDownloader imageDownloader = new ImageDownloader();
@@ -347,26 +350,34 @@ public class FilterActivity extends AppCompatActivity {
 
     // Called after async Filter function
     private void displayTracks() {
+        /*
         ScrollView filterScroll = findViewById(R.id.trackScroll);
         filterScroll.setVisibility(View.VISIBLE);
         LinearLayout scroll = findViewById(R.id.trackGallery);
 
         LayoutInflater layoutInflater = LayoutInflater.from(this);
+        */
 
         int size = filteredTrackIds.size();
 
         Log.d("SIZE", String.valueOf(size));
 
+        TrackAdapter trackAdapter = new TrackAdapter(FilterActivity.this, filteredTrackName, filteredBPMs, filteredTrackIds);
+        RecyclerView recyclerView = findViewById(R.id.track_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(trackAdapter);
+
+        /*
         for(int i = 0; i < size; i++){
             // Log.d("display object" + i, String.valueOf(filteredBPMs.get(i)) + " "+ String.valueOf(filteredTrackIds.get(i)));
             View view = layoutInflater.inflate(R.layout.itemtrack, scroll, false);
 
-            TextView playlistTitle = view.findViewById(R.id.tracktitle);
-            playlistTitle.setText((CharSequence) filteredTrackName.get(i));
+            TextView trackTitle = view.findViewById(R.id.tracktitle);
+            trackTitle.setText((CharSequence) filteredTrackName.get(i));
             Log.d("track " + i, String.valueOf(filteredTrackName.get(i)));
 
-            TextView playlistCount = view.findViewById(R.id.trackBPM);
-            playlistCount.setText(String.valueOf(filteredBPMs.get(i)));
+            TextView trackBPM = view.findViewById(R.id.trackBPM);
+            trackBPM.setText(String.valueOf(filteredBPMs.get(i)));
 
             byte[] imageByte = trackDB.getIMGByte((String) filteredTrackIds.get(i));
             Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
@@ -375,6 +386,7 @@ public class FilterActivity extends AppCompatActivity {
 
             scroll.addView(view);
         }
+        */
 
         double percentfound =  100 * ((double) size / (double) Count);
         Log.d("Percent Found", String.valueOf(percentfound ));
