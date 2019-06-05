@@ -50,10 +50,10 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackHolder>
 
     @Override
     public int getItemCount() {
-        return trackNames.size();
+        return trackIds.size();
     }
 
-    public static class TrackHolder extends RecyclerView.ViewHolder{
+    public class TrackHolder extends RecyclerView.ViewHolder{
         TextView trackTitle;
         TextView trackBPM;
         ImageView trackImage;
@@ -66,7 +66,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackHolder>
         }
     }
 
-    public List returnIds(){
+    public List getTrackIds(){
         return trackIds;
     }
 }

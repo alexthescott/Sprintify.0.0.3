@@ -5,22 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -37,8 +35,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class FilterActivity extends AppCompatActivity {
@@ -81,7 +83,7 @@ public class FilterActivity extends AppCompatActivity {
         Href = intent.getExtras().getString("Href");
         Name = intent.getExtras().getString("Name");
         Count = Integer.valueOf(intent.getExtras().getString("Count"));
-        userId = intent.getExtras().getString("userId");
+        userId = intent.getExtras().getString("userID");
         CountLeft = Count;
         this.setTitle(Name);
 
@@ -112,11 +114,99 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
-    public void createPlaylist(View view) {
-        List filteredIds = trackAdapter.returnIds();
-        Log.d("filteredIDS", String.valueOf(filteredIds));
+    public void createPlaylist(View view){
+        MediaType MEDIA_TYPE = MediaType.parse("application/json");
+        String url = "https://api.spotify.com/v1/users/" + userId + "/playlists";
+        OkHttpClient client = new OkHttpClient();
+        JSONObject postdate = new JSONObject();
+        try{
+            postdate.put("name", Name + " (" + min + "-" + max + " BPM)");
+            postdate.put("description", "Made with Sprintify");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
+        RequestBody body = RequestBody.create(MEDIA_TYPE, postdate.toString());
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .header("Content-Type", "application/json")
+                .header("Authorization","Bearer " + mAccessToken)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d("BUMMER", e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    JSONObject newPlaylist = new JSONObject(response.body().string());
+                    // Log.d("newPlaylistid", String.valueOf(newPlaylist.getString("id")));
+
+                    // pass playlistId and add filtered tracks
+                    addSongsToPlaylist(newPlaylist.getString("id"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
+
+    private void addSongsToPlaylist(String playlistId) {
+        List filteredTracks = trackAdapter.getTrackIds();
+        JSONArray trackJArray = new JSONArray();
+        StringBuilder trackURI = new StringBuilder();
+        for(int i = 0; i < trackAdapter.getItemCount(); i++){
+            trackJArray.put("spotify:track:" + (filteredTracks.get(i)));
+            if(i != 0 && i % 99 == 0 || i + 1 == trackAdapter.getItemCount()){
+                // add last track
+                JSONObject postTracks = new JSONObject();
+                try {
+                    postTracks.put("uris", trackJArray);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                Log.d("postTracks", postTracks.toString());
+
+                MediaType MEDIA_TYPE = MediaType.parse("application/json");
+                RequestBody body = RequestBody.create(MEDIA_TYPE, postTracks.toString());
+
+                String TrackURIString = trackURI.toString();
+                // TrackURIString.split(",");
+
+                String url = "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks";
+                OkHttpClient client = new OkHttpClient();
+
+                Request request = new Request.Builder()
+                        .url(url)
+                        .post(body)
+                        .header("Content-Type", "application/json")
+                        .header("Authorization", "Bearer " + mAccessToken)
+                        .build();
+
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.d("BUMMER", e.toString());
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        Log.d("RESPONSE", response.toString());
+                        Log.d(Name, "Adding tracks");
+                    }
+                });
+                trackURI = new StringBuilder();
+                trackJArray = new JSONArray();
+                Log.d("trackJArraySize", trackJArray.toString());
+            }
+        }
+    }
+
 
     // Get List of Tracks & insert into trackID
     private class getTracks extends AsyncTask<String, Void, JSONObject> {
@@ -353,43 +443,36 @@ public class FilterActivity extends AppCompatActivity {
 
     // Called after async Filter function
     private void displayTracks() {
-        /*
-        ScrollView filterScroll = findViewById(R.id.trackScroll);
-        filterScroll.setVisibility(View.VISIBLE);
-        LinearLayout scroll = findViewById(R.id.trackGallery);
-
-        LayoutInflater layoutInflater = LayoutInflater.from(this);
-        */
-
         int size = filteredTrackIds.size();
-
         Log.d("SIZE", String.valueOf(size));
+
+
 
         trackAdapter = new TrackAdapter(FilterActivity.this, filteredTrackName, filteredBPMs, filteredTrackIds);
         RecyclerView recyclerView = findViewById(R.id.track_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(trackAdapter);
 
-        /*
-        for(int i = 0; i < size; i++){
-            // Log.d("display object" + i, String.valueOf(filteredBPMs.get(i)) + " "+ String.valueOf(filteredTrackIds.get(i)));
-            View view = layoutInflater.inflate(R.layout.itemtrack, scroll, false);
+        SwipeController swipeController = new SwipeController(ctx, new SwipeControllerActions() {
+            @Override
+            public void onRightClicked(int position) {
+                trackAdapter.trackIds.remove(position);
+                trackAdapter.trackBPM.remove(position);
+                trackAdapter.trackNames.remove(position);
+                trackAdapter.notifyItemRemoved(position);
+                trackAdapter.notifyItemRangeChanged(position, trackAdapter.getItemCount());
+            }
+        });
 
-            TextView trackTitle = view.findViewById(R.id.tracktitle);
-            trackTitle.setText((CharSequence) filteredTrackName.get(i));
-            Log.d("track " + i, String.valueOf(filteredTrackName.get(i)));
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
-            TextView trackBPM = view.findViewById(R.id.trackBPM);
-            trackBPM.setText(String.valueOf(filteredBPMs.get(i)));
-
-            byte[] imageByte = trackDB.getIMGByte((String) filteredTrackIds.get(i));
-            Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-            ImageView playlistImage = view.findViewById(R.id.trackItemImage);
-            playlistImage.setImageBitmap(image);
-
-            scroll.addView(view);
-        }
-        */
+        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                swipeController.onDraw(c);
+            }
+        });
 
         double percentfound =  100 * ((double) size / (double) Count);
         Log.d("Percent Found", String.valueOf(percentfound ));

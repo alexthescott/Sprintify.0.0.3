@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("getAuthRequest", "Building Auth Request");
         return new AuthenticationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
                 .setShowDialog(false)
-                .setScopes(new String[]{"playlist-modify-private"})
+                .setScopes(new String[]{"playlist-modify-public"})
                 .build();
     }
 
