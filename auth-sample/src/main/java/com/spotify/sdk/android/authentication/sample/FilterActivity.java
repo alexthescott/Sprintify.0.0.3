@@ -400,7 +400,6 @@ public class FilterActivity extends AppCompatActivity {
                         // because i'm a meme 5/15/19
                         //         - Alex
 
-
                         else{ // In Case no Features found
                             Log.d("FAILED", "No Audio Features");
                             // SINGLE REQUEST

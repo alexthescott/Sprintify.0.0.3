@@ -23,4 +23,6 @@
     <color name="colorPrimary">#1DB954</color>
     <color name="colorPrimaryDark">#191414</color>
     <color name="colorAccent">#FFFFFF</color>
+    <color name="pressed">#15843c</color>
+    <color name="idle">#1db954</color>
 </resources>
