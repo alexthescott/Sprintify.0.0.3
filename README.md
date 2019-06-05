@@ -3,6 +3,7 @@
       1. playlist create add github url to playlist description
       2. artist names alongside track name when displaying tracks
       3. login rememberance
+      4. edge case where playlist has 0 tracks
 
 ##  Medium:
       1. post generate new playlist interface (reordering, audio preview)
