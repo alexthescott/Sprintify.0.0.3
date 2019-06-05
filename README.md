@@ -1,8 +1,9 @@
 ###### To-Do:  
 ##	Hot:    
-      1. create new playlist on account post filter
-      2. post generate new playlist interface (reordering, audio preview, remove songs, display song length)
-      3. build a database for every "seen" song
+      1. post generate new playlist interface (reordering, audio preview)
+      2. playlist create add github url to playlist description
+      3. artist names alongside track name when displaying tracks
+      4. playlist hover state
 
 ##  Medium:    
       1. hamburger menu to add logout and settings
@@ -10,7 +11,4 @@
       
 ##  Mild:  
       1. refresh button in action bar to check if new playlists are made    
-      2. playlist create add github url to playlist description
-      3. remove playlist data from database for playlists that have been removed from user account
-      4. option to clear seen song cache
-      5. create free spotify account to host pre-gen playlists
+      2. create free spotify account to host pre-gen playlists
