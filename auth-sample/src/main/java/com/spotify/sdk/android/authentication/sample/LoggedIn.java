@@ -217,7 +217,7 @@ public class LoggedIn extends AppCompatActivity {
 
         LayoutInflater inflater = LayoutInflater.from(this);
 
-        for(int i = 0; i < numberPlaylists; i++){
+        for(int i = 0; i < playlistNames.size(); i++){
             View view = inflater.inflate(R.layout.itemplaylist, scroll, false);
 
             TextView playlistTitle = view.findViewById(R.id.playlistTitle);
@@ -303,30 +303,33 @@ public class LoggedIn extends AppCompatActivity {
             for(int i = 0; i < 50 && i < numberPlaylistsLeft; i++){
                 JSONObject playlists = items.getJSONObject(i);
 
-                // Extract ID
-                Log.d("ID", playlists.getString("id"));
-                playlistId.add(playlists.getString("id"));
+                if(Integer.valueOf(playlists.getJSONObject("tracks").getString("total")) != 0){
+                    // Extract track total
+                    Log.d("track total", playlists.getJSONObject("tracks").getString("total"));
+                    playlistTrackTotal.add(playlists.getJSONObject("tracks").getString("total"));
 
-                // Extract snapshot_id
-                Log.d("snapshot_id", playlists.getString("snapshot_id"));
-                playlistSnap.add(playlists.getString("snapshot_id"));
+                    // Extract ID
+                    Log.d("ID", playlists.getString("id"));
+                    playlistId.add(playlists.getString("id"));
 
-                // Extract Name
-                Log.d("Name:", playlists.getString("name"));
-                playlistNames.add(playlists.getString("name"));
+                    // Extract snapshot_id
+                    Log.d("snapshot_id", playlists.getString("snapshot_id"));
+                    playlistSnap.add(playlists.getString("snapshot_id"));
 
-                // Extract href
-                Log.d("href", playlists.getString("href"));
-                playlistHref.add(playlists.getString("href"));
+                    // Extract Name
+                    Log.d("Name:", playlists.getString("name"));
+                    playlistNames.add(playlists.getString("name"));
 
-                // Extract track total
-                Log.d("track total", playlists.getJSONObject("tracks").getString("total"));
-                playlistTrackTotal.add(playlists.getJSONObject("tracks").getString("total"));
+                    // Extract href
+                    Log.d("href", playlists.getString("href"));
+                    playlistHref.add(playlists.getString("href"));
 
-                // Extract Playlist Image URL
-                String imageUrl = playlists.getJSONArray("images").getJSONObject(0).getString("url");
-                Log.d("Image URL",imageUrl);
-                playlistImageURL.add(imageUrl);
+                    // Extract Playlist Image URL
+                    String imageUrl = playlists.getJSONArray("images").getJSONObject(0).getString("url");
+                    Log.d("Image URL",imageUrl);
+                    playlistImageURL.add(imageUrl);
+
+                }
             }
 
             if(numberPlaylistsLeft > 50){ // more playlists to find
