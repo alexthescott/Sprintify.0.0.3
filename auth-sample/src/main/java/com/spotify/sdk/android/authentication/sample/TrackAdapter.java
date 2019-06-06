@@ -21,6 +21,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackHolder>
     List trackNames;
     List trackBPM;
     List trackIds;
+    List trackArtists;
     LayoutInflater mInflater;
 
     @NonNull
@@ -30,18 +31,20 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackHolder>
         return new TrackHolder(view);
     }
 
-    public TrackAdapter(Context ctx, List newTrackNames, List newTrackBPM, List newTrackIds){
+    public TrackAdapter(Context ctx, List newTrackNames, List newTrackArtists, List newTrackBPM, List newTrackIds){
         Log.d("TRACKADAPTER", "Created Instance");
         mInflater = LayoutInflater.from(ctx);
-        trackIds = newTrackIds;
         trackDB = new TrackDB(ctx, "TRACK_IMAGE_DATABASE", null, 1);
-        trackNames = newTrackNames;
-        trackBPM = newTrackBPM;
+        this.trackIds = newTrackIds;
+        this.trackNames = newTrackNames;
+        this.trackBPM = newTrackBPM;
+        this.trackArtists = newTrackArtists;
     }
 
     @Override
     public void onBindViewHolder(@NonNull TrackHolder trackHolder, int i) {
-        trackHolder.trackTitle.setText((CharSequence) trackNames.get(i));
+        String title = trackNames.get(i) + " by " + trackArtists.get(i);
+        trackHolder.trackTitle.setText(title);
         trackHolder.trackBPM.setText(String.valueOf(trackBPM.get(i)));
         byte[] imageByte = trackDB.getIMGByte((String) trackIds.get(i));
         Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);

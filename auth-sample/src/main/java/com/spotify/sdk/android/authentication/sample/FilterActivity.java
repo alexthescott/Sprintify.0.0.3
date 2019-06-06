@@ -78,11 +78,13 @@ public class FilterActivity extends AppCompatActivity {
     List trackID = new ArrayList();
     List trackName = new ArrayList();
     List trackImageURL = new ArrayList();
+    List trackArtist = new ArrayList();
 
     List filteredTrackIds = new ArrayList();
     List filteredBPMs = new ArrayList();
     List filteredTrackName = new ArrayList();
     List filterTrackImageURL = new ArrayList();
+    List filterTrackArtists = new ArrayList();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -370,6 +372,7 @@ public class FilterActivity extends AppCompatActivity {
                 JSONObject trackInfo = track.getJSONObject("track");
                 trackID.add(trackInfo.getString("id"));
                 trackName.add(trackInfo.getString("name"));
+                trackArtist.add(trackInfo.getJSONArray("artists").getJSONObject(0).getString("name"));
                 trackImageURL.add(trackInfo.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"));
 
                 if (!(trackDB.checkID((String) trackID.get(i)))) {
@@ -434,7 +437,7 @@ public class FilterActivity extends AppCompatActivity {
                                         filteredTrackIds.add(trackID.get(j));
                                         filteredTrackName.add(trackName.get(j));
                                         filterTrackImageURL.add(trackImageURL.get(j));
-
+                                        filterTrackArtists.add(trackArtist.get(j));
                                         Log.d(trackName.get(j) + " is " + j , String.valueOf(trackBPM));
                                     }
                                 }
@@ -443,34 +446,6 @@ public class FilterActivity extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         }
-                        /*
-
-                        // Lol let's comment this out
-                        // and see if the app crashes
-                        // if not get rid of else bit
-                        // because i'm a meme 5/15/19
-                        //         - Alex
-
-                        else{ // In Case no Features found
-                            Log.d("FAILED", "No Audio Features");
-                            // SINGLE REQUEST
-                            for(int z = i - 100; z < i; z++){ // Loop tracks individually
-                                String singleUrl = "https://api.spotify.com/v1/audio-features/" + trackID.get(z);
-                                final Request singleRequest = new Request.Builder()
-                                        .url(singleUrl)
-                                        .addHeader("Authorization","Bearer " + mAccessToken)
-                                        .build();
-                                try{
-                                    Response singleResponse = client.newCall(singleRequest).execute();
-                                    String stringSingleJSON = singleResponse.body().string();
-                                    JSONObject singleJSON = new JSONObject(stringSingleJSON);
-                                    Log.d("SINGLEREQ" + z, String.valueOf(singleJSON.getString("tempo")));
-                                }catch(Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                        */
                     } catch(Exception e){
                         e.printStackTrace();
                     }
@@ -496,9 +471,7 @@ public class FilterActivity extends AppCompatActivity {
         int size = filteredTrackIds.size();
         Log.d("SIZE", String.valueOf(size));
 
-
-
-        trackAdapter = new TrackAdapter(FilterActivity.this, filteredTrackName, filteredBPMs, filteredTrackIds);
+        trackAdapter = new TrackAdapter(FilterActivity.this, filteredTrackName, filterTrackArtists, filteredBPMs, filteredTrackIds);
         RecyclerView recyclerView = findViewById(R.id.track_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(trackAdapter);
