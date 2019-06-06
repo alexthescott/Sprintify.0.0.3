@@ -253,11 +253,6 @@ public class LoggedIn extends AppCompatActivity {
                     Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
                     if (outputStream.toByteArray() != null) {
                         byte[] imageByte = outputStream.toByteArray();
-                        /*
-                        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
-                        playlistImage.setImageBitmap(image);
-                        */
                         playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
                     }
                     // scroll.addView(view);
@@ -275,15 +270,9 @@ public class LoggedIn extends AppCompatActivity {
                     Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
                     if (outputStream.toByteArray() != null) {
                         byte[] imageByte = outputStream.toByteArray();
-                        /*
-                        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
-                        playlistImage.setImageBitmap(image);
-                        */
                         playlistDB.delete((String) playlistId.get(i));
                         playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
                     }
-                    // scroll.addView(view);
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
@@ -291,16 +280,6 @@ public class LoggedIn extends AppCompatActivity {
                 }
                 // Playlist Found
             }
-            /*
-            else {
-
-                ImageView playlistImage = view.findViewById(R.id.playlistImage);
-                byte[] imageByte = playlistDB.getIMGByte((String) playlistId.get(i));
-                Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                playlistImage.setImageBitmap(image);
-                scroll.addView(view);
-            }
-            */
         }
 
         for(int i = 0; i < playlistNames.size(); i++){
