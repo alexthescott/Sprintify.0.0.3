@@ -1,7 +1,6 @@
 ###### To-Do:  
 ##	Hot:    
       1. login rememberance
-      2. edge case where playlist has 0 tracks
 
 ##  Medium:
       1. post generate new playlist interface (reordering, audio preview)
