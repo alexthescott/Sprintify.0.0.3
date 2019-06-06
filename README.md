@@ -1,6 +1,6 @@
 ###### To-Do:  
 ##	Hot:    
-      1. login rememberance
+      1. playlist and track hovers
 
 ##  Medium:
       1. post generate new playlist interface (reordering, audio preview)
