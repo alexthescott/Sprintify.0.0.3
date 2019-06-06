@@ -237,6 +237,7 @@ public class FilterActivity extends AppCompatActivity {
                             Uri playlistUri = Uri.parse(url);
                             Intent launchBrowser = new Intent(Intent.ACTION_VIEW, playlistUri);
                             startActivity(launchBrowser);
+                            finish();
                         }
                     })
                     .setNegativeButton("Back to Playlists", new DialogInterface.OnClickListener() {
@@ -482,6 +483,7 @@ public class FilterActivity extends AppCompatActivity {
                 trackAdapter.trackIds.remove(position);
                 trackAdapter.trackBPM.remove(position);
                 trackAdapter.trackNames.remove(position);
+                trackAdapter.trackArtists.remove(position);
                 trackAdapter.notifyItemRemoved(position);
                 trackAdapter.notifyItemRangeChanged(position, trackAdapter.getItemCount());
             }
@@ -498,6 +500,7 @@ public class FilterActivity extends AppCompatActivity {
         });
 
         double percentfound =  100 * ((double) size / (double) Count);
+        percentfound = Math.round(percentfound);
         Log.d("Percent Found", String.valueOf(percentfound ));
         Toast.makeText(ctx, "Found " + size + " songs, " + percentfound + "% are in range", Toast.LENGTH_LONG).show();
 

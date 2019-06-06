@@ -10,6 +10,7 @@
         android:id="@+id/trackGallery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/playlist_hover"
         android:orientation="vertical">
 
         <LinearLayout
@@ -48,7 +49,7 @@
                     android:textSize="14sp" />
 
                 <TextView
-                    android:id="@+id/trackBPM"
+                    android:id="@+id/playlistCount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="20dp"

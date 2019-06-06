@@ -3,11 +3,15 @@ package com.spotify.sdk.android.authentication.sample;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +39,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class LoggedIn extends AppCompatActivity {
+    final String pref = "SPRINTIFY_PREF";
+
     PlaylistDB playlistDB;
+    PlaylistAdapter playlistAdapter;
     Context ctx = LoggedIn.this;
     ProgressDialog PlaylistDialog;
 
@@ -65,6 +72,30 @@ public class LoggedIn extends AppCompatActivity {
 
         new GetPlaylistJson().execute(mAccessToken);
         new getUserID().execute(mAccessToken);
+
+        FloatingActionButton fab = findViewById(R.id.floatingActionButton2);
+        fab.hide();
+    }
+
+    public void refreshPlaylists(View view) {
+        setContentView(R.layout.activity_logged_in);
+
+        playlistNames.clear();
+        playlistImageURL.clear();
+        playlistHref.clear();
+        playlistTrackTotal.clear();
+        playlistId.clear();
+        playlistSnap.clear();
+
+        new GetPlaylistJson().execute(mAccessToken);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences.Editor editor = getSharedPreferences(pref, MODE_PRIVATE).edit();
+        editor.putInt("loggedIn", 1);
+        editor.apply();
     }
 
     private class GetPlaylistJson extends AsyncTask<String, Void, JSONObject> {
@@ -213,19 +244,7 @@ public class LoggedIn extends AppCompatActivity {
     }
 
     private void showPlaylists() {
-        LinearLayout scroll = findViewById(R.id.playlistGallery);
-
-        LayoutInflater inflater = LayoutInflater.from(this);
-
         for(int i = 0; i < playlistNames.size(); i++){
-            View view = inflater.inflate(R.layout.itemplaylist, scroll, false);
-
-            TextView playlistTitle = view.findViewById(R.id.playlistTitle);
-            playlistTitle.setText((CharSequence) playlistNames.get(i));
-
-            TextView playlistCount = view.findViewById(R.id.trackBPM);
-            playlistCount.setText((CharSequence) playlistTrackTotal.get(i));
-
             // playlist not in DataBase
             if (!(playlistDB.checkID((String) playlistId.get(i)))) {
                 ImageDownloader imageDownloader = new ImageDownloader();
@@ -234,13 +253,14 @@ public class LoggedIn extends AppCompatActivity {
                     Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
                     if (outputStream.toByteArray() != null) {
                         byte[] imageByte = outputStream.toByteArray();
+                        /*
                         Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-
                         ImageView playlistImage = view.findViewById(R.id.playlistImage);
                         playlistImage.setImageBitmap(image);
+                        */
                         playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
                     }
-                    scroll.addView(view);
+                    // scroll.addView(view);
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
@@ -255,31 +275,110 @@ public class LoggedIn extends AppCompatActivity {
                     Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
                     if (outputStream.toByteArray() != null) {
                         byte[] imageByte = outputStream.toByteArray();
+                        /*
                         Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-
                         ImageView playlistImage = view.findViewById(R.id.playlistImage);
                         playlistImage.setImageBitmap(image);
+                        */
                         playlistDB.delete((String) playlistId.get(i));
                         playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
                     }
-
-                    scroll.addView(view);
+                    // scroll.addView(view);
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 // Playlist Found
-            } else {
-                Log.d("playlistDB", "retreiving " + playlistNames.get(i) + " photo from database");
+            }
+            /*
+            else {
+
                 ImageView playlistImage = view.findViewById(R.id.playlistImage);
                 byte[] imageByte = playlistDB.getIMGByte((String) playlistId.get(i));
                 Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
                 playlistImage.setImageBitmap(image);
                 scroll.addView(view);
             }
+            */
         }
+
+        for(int i = 0; i < playlistNames.size(); i++){
+            // playlist not in DataBase
+            if (!(playlistDB.checkID((String) playlistId.get(i)))) {
+                ImageDownloader imageDownloader = new ImageDownloader();
+                try {
+                    ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
+                    Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
+                    if (outputStream.toByteArray() != null) {
+                        byte[] largeImageByte = outputStream.toByteArray();
+                        Bitmap largeImage = BitmapFactory.decodeByteArray(largeImageByte, 0, largeImageByte.length);
+                        Bitmap image = Bitmap.createScaledBitmap(largeImage, 100, 100, false);
+                        ByteArrayOutputStream compress = new ByteArrayOutputStream();
+                        image.compress(Bitmap.CompressFormat.PNG, 10, compress);
+                        byte[] imageByte = compress.toByteArray();
+
+                        /*
+                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
+                        playlistImage.setImageBitmap(image);
+                        */
+                        playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
+                    }
+                    // scroll.addView(view);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                // playlist
+            } else if (!(playlistDB.checkSnap((String) playlistId.get(i), (String) playlistSnap.get(i)))) {
+                ImageDownloader imageDownloader = new ImageDownloader();
+                try {
+                    ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
+                    Log.d("PlaylistTitle", String.valueOf(playlistNames.get(i)));
+                    if (outputStream.toByteArray() != null) {
+                        byte[] largeImageByte = outputStream.toByteArray();
+                        Bitmap largeImage = BitmapFactory.decodeByteArray(largeImageByte, 0, largeImageByte.length);
+                        Bitmap image = Bitmap.createScaledBitmap(largeImage, 100, 100, false);
+                        ByteArrayOutputStream compress = new ByteArrayOutputStream();
+                        image.compress(Bitmap.CompressFormat.PNG, 10, compress);
+                        byte[] imageByte = compress.toByteArray();
+                        /*
+                        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
+                        playlistImage.setImageBitmap(image);
+                        */
+                        playlistDB.delete((String) playlistId.get(i));
+                        playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
+                    }
+                    // scroll.addView(view);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                // Playlist Found
+            }
+            /*
+            else {
+
+                ImageView playlistImage = view.findViewById(R.id.playlistImage);
+                byte[] imageByte = playlistDB.getIMGByte((String) playlistId.get(i));
+                Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+                playlistImage.setImageBitmap(image);
+                scroll.addView(view);
+            }
+            */
+        }
+
+        playlistAdapter = new PlaylistAdapter(LoggedIn.this, playlistNames, playlistTrackTotal, playlistId);
+        RecyclerView recyclerView = findViewById(R.id.playlist_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(playlistAdapter);
         PlaylistDialog.dismiss();
+        FloatingActionButton fab = findViewById(R.id.floatingActionButton2);
+        fab.show();
     }
 
     private void getNumberOfPlaylists(JSONObject playlistOBJ) {

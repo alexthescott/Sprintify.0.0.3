@@ -74,45 +74,12 @@
         android:onClick="createPlaylist"
         />
 
-    <Switch
-        android:id="@+id/switch1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="55dp"
-        android:layout_marginRight="55dp"
-        android:checked="false"
-        android:text="🔥"
-        android:textColor="#00FFFFFF"
-        android:textColorHighlight="@color/colorPrimary"
-        android:textColorHint="@color/pressed"
-        app:layout_constraintEnd_toStartOf="@+id/filterButton"
-        app:layout_constraintTop_toBottomOf="@+id/maxEdit" />
-
     <android.support.v7.widget.RecyclerView
-        app:layout_constraintTop_toBottomOf="parent"
         android:id="@+id/track_recycler_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:scrollbars="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-    />
+        app:layout_constraintTop_toBottomOf="parent" />
 
-
-    <ScrollView
-        android:id="@+id/trackScroll"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filterButton">
-
-        <LinearLayout
-            android:id="@+id/trackGallery"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </ScrollView>
 
 </android.support.constraint.ConstraintLayout>

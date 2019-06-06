@@ -3,7 +3,6 @@ package com.spotify.sdk.android.authentication.sample;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackHolder> {
@@ -64,7 +62,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackHolder>
         public TrackHolder(View itemView) {
             super(itemView);
             trackTitle = itemView.findViewById(R.id.tracktitle);
-            trackBPM = itemView.findViewById(R.id.trackBPM);
+            trackBPM = itemView.findViewById(R.id.playlistCount);
             trackImage = itemView.findViewById(R.id.trackItemImage);
         }
     }

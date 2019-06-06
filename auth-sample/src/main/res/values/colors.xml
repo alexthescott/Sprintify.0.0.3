@@ -25,4 +25,5 @@
     <color name="colorAccent">#FFFFFF</color>
     <color name="pressed">#15843c</color>
     <color name="idle">#1db954</color>
+    <color name="playlistPressed">#66000000</color>
 </resources>
