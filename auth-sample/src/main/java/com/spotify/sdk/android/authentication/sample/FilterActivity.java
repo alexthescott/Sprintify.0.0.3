@@ -1,11 +1,14 @@
 package com.spotify.sdk.android.authentication.sample;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -44,7 +47,12 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class FilterActivity extends AppCompatActivity {
+    // Filter
     ProgressDialog PlaylistDialog;
+
+    // Add Tracks
+    ProgressDialog pd;
+
     FloatingActionButton fab;
     Context ctx = FilterActivity.this;
     TrackDB trackDB;
@@ -54,6 +62,7 @@ public class FilterActivity extends AppCompatActivity {
     String Href;
     String Name;
     String userId;
+    String newName;
 
     int min;
     int max;
@@ -63,6 +72,8 @@ public class FilterActivity extends AppCompatActivity {
     int Count;
     int CountLeft;
     int CountOffset = 0;
+
+    private static FilterActivity parent;
 
     List trackID = new ArrayList();
     List trackName = new ArrayList();
@@ -119,9 +130,12 @@ public class FilterActivity extends AppCompatActivity {
         String url = "https://api.spotify.com/v1/users/" + userId + "/playlists";
         OkHttpClient client = new OkHttpClient();
         JSONObject postdate = new JSONObject();
+
         try{
             postdate.put("name", Name + " (" + min + "-" + max + " BPM)");
-            postdate.put("description", "Made with Sprintify");
+            postdate.put("description", "Made with Sprintify. https://github.com/alexthescott/Sprintify.0.0.4");
+
+            newName = Name + " (" + min + "-" + max + " BPM)";
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -145,9 +159,7 @@ public class FilterActivity extends AppCompatActivity {
                 try {
                     JSONObject newPlaylist = new JSONObject(response.body().string());
                     // Log.d("newPlaylistid", String.valueOf(newPlaylist.getString("id")));
-
-                    // pass playlistId and add filtered tracks
-                    addSongsToPlaylist(newPlaylist.getString("id"));
+                    new addSongsToPlaylist().execute(newPlaylist.getString("id"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -155,55 +167,94 @@ public class FilterActivity extends AppCompatActivity {
         });
     }
 
-    private void addSongsToPlaylist(String playlistId) {
+
+    private class addSongsToPlaylist extends AsyncTask<String, Void, Void> {
         List filteredTracks = trackAdapter.getTrackIds();
-        JSONArray trackJArray = new JSONArray();
-        StringBuilder trackURI = new StringBuilder();
-        for(int i = 0; i < trackAdapter.getItemCount(); i++){
-            trackJArray.put("spotify:track:" + (filteredTracks.get(i)));
-            if(i != 0 && i % 99 == 0 || i + 1 == trackAdapter.getItemCount()){
-                // add last track
-                JSONObject postTracks = new JSONObject();
-                try {
-                    postTracks.put("uris", trackJArray);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        int numberOfTracks = filteredTracks.size();
+        String playlistID;
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            playlistID = strings[0];
+            JSONArray trackJArray = new JSONArray();
+            for (int i = 0; i < numberOfTracks; i++) {
+                trackJArray.put("spotify:track:" + (filteredTracks.get(i)));
+                if (i != 0 && i % 99 == 0 || i + 1 == trackAdapter.getItemCount()) {
+                    // add last track
+                    JSONObject postTracks = new JSONObject();
+                    try {
+                        postTracks.put("uris", trackJArray);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    // Log.d("postTracks", postTracks.toString());
+
+                    MediaType MEDIA_TYPE = MediaType.parse("application/json");
+                    RequestBody body = RequestBody.create(MEDIA_TYPE, postTracks.toString());
+
+                    String url = "https://api.spotify.com/v1/playlists/" + strings[0] + "/tracks";
+                    OkHttpClient client = new OkHttpClient();
+
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .post(body)
+                            .header("Content-Type", "application/json")
+                            .header("Authorization", "Bearer " + mAccessToken)
+                            .build();
+
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            Log.d("BUMMER", e.toString());
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            Log.d("RESPONSE", response.toString());
+                            Log.d(Name, "Adding tracks");
+
+                        }
+                    });
+                    trackJArray = new JSONArray();
+                    Log.d("trackJArraySize", trackJArray.toString());
                 }
-
-                Log.d("postTracks", postTracks.toString());
-
-                MediaType MEDIA_TYPE = MediaType.parse("application/json");
-                RequestBody body = RequestBody.create(MEDIA_TYPE, postTracks.toString());
-
-                String TrackURIString = trackURI.toString();
-                // TrackURIString.split(",");
-
-                String url = "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks";
-                OkHttpClient client = new OkHttpClient();
-
-                Request request = new Request.Builder()
-                        .url(url)
-                        .post(body)
-                        .header("Content-Type", "application/json")
-                        .header("Authorization", "Bearer " + mAccessToken)
-                        .build();
-
-                client.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        Log.d("BUMMER", e.toString());
-                    }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        Log.d("RESPONSE", response.toString());
-                        Log.d(Name, "Adding tracks");
-                    }
-                });
-                trackURI = new StringBuilder();
-                trackJArray = new JSONArray();
-                Log.d("trackJArraySize", trackJArray.toString());
             }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            AlertDialog optionsDialog = new AlertDialog.Builder(ctx, R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+                    .setCancelable(false)
+                    .setTitle("Created " + newName)
+                    .setPositiveButton("Open Spotify", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String url = "https://open.spotify.com/user/" + userId + "/playlist/" + playlistID;
+                            Uri playlistUri = Uri.parse(url);
+                            Intent launchBrowser = new Intent(Intent.ACTION_VIEW, playlistUri);
+                            startActivity(launchBrowser);
+                        }
+                    })
+                    .setNegativeButton("Back to Playlists", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                    .setNeutralButton("Exit App", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent startMain = new Intent(Intent.ACTION_MAIN);
+                            startMain.addCategory(Intent.CATEGORY_HOME);
+                            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(startMain);
+                        }
+                    })
+                    .create();
+
+            optionsDialog.show();
         }
     }
 

@@ -51,9 +51,10 @@ public class PlaylistDB extends SQLiteOpenHelper {
         while (playlistIDs.moveToNext()) {
             if (pl_id.equals(playlistIDs.getString(0))) {
                 db.execSQL("DELETE FROM " + TABLE_NAME + " WHERE _id = \"" + pl_id + "\";");
-                playlistIDs.close();
+                // playlistIDs.close();
             }
         }
+        playlistIDs.close();
     }
 
     public boolean checkID(String pl_id) {

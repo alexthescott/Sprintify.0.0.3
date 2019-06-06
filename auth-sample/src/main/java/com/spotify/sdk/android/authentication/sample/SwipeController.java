@@ -1,9 +1,9 @@
 package com.spotify.sdk.android.authentication.sample;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -106,9 +106,9 @@ public class SwipeController extends ItemTouchHelper.Callback {
         });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setTouchUpListener(final Canvas c, final RecyclerView rView, final RecyclerView.ViewHolder vHolder, final float dX, final float dY, final int actionState, final boolean isCurrentlyActive){
         rView.setOnTouchListener(new View.OnTouchListener(){
-
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_UP){
