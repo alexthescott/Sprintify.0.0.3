@@ -317,14 +317,8 @@ public class LoggedIn extends AppCompatActivity {
                         ByteArrayOutputStream compress = new ByteArrayOutputStream();
                         image.compress(Bitmap.CompressFormat.PNG, 10, compress);
                         byte[] imageByte = compress.toByteArray();
-
-                        /*
-                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
-                        playlistImage.setImageBitmap(image);
-                        */
                         playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
                     }
-                    // scroll.addView(view);
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
@@ -344,35 +338,18 @@ public class LoggedIn extends AppCompatActivity {
                         ByteArrayOutputStream compress = new ByteArrayOutputStream();
                         image.compress(Bitmap.CompressFormat.PNG, 10, compress);
                         byte[] imageByte = compress.toByteArray();
-                        /*
-                        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                        ImageView playlistImage = view.findViewById(R.id.playlistImage);
-                        playlistImage.setImageBitmap(image);
-                        */
                         playlistDB.delete((String) playlistId.get(i));
                         playlistDB.insert((String) playlistId.get(i), (String) playlistSnap.get(i), (String) playlistImageURL.get(i), imageByte);
                     }
-                    // scroll.addView(view);
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                // Playlist Found
             }
-            /*
-            else {
-
-                ImageView playlistImage = view.findViewById(R.id.playlistImage);
-                byte[] imageByte = playlistDB.getIMGByte((String) playlistId.get(i));
-                Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-                playlistImage.setImageBitmap(image);
-                scroll.addView(view);
-            }
-            */
         }
 
-        playlistAdapter = new PlaylistAdapter(LoggedIn.this, playlistNames, playlistTrackTotal, playlistId);
+        playlistAdapter = new PlaylistAdapter(LoggedIn.this, playlistNames, playlistTrackTotal, playlistId, playlistHref, userID, mAccessToken);
         RecyclerView recyclerView = findViewById(R.id.playlist_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(playlistAdapter);
@@ -447,21 +424,4 @@ public class LoggedIn extends AppCompatActivity {
         }
         return null;
     }
-
-    public void openPlaylist(View view) {
-        ViewGroup parent = (ViewGroup) view.getParent();
-        ViewGroup grandParent = (ViewGroup) parent.getParent();
-        int index = grandParent.indexOfChild(parent);
-
-
-        // Toast.makeText(ctx, String.valueOf(playlistNames.get(index)), Toast.LENGTH_SHORT).show();
-        Intent i = new Intent(this, FilterActivity.class);
-        i.putExtra("Token", mAccessToken);
-        i.putExtra("Href", String.valueOf(playlistHref.get(index)));
-        i.putExtra("Name", String.valueOf(playlistNames.get(index)));
-        i.putExtra("Count", String.valueOf(playlistTrackTotal.get(index)));
-        i.putExtra("userID", userID);
-        this.startActivity(i);
-    }
-    
 }

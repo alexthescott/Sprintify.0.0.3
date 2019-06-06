@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             AuthenticationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request);
         } else {
             final Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_main), R.string.warning_need_internet, Snackbar.LENGTH_SHORT);
-            snackbar.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.colorAccent));
+            snackbar.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
             snackbar.show();
         }
     }
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         Intent i = new Intent(this, LoggedIn.class);
         if (mAccessToken == null) {
             final Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_main), R.string.warning_need_token, Snackbar.LENGTH_SHORT);
-            snackbar.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.colorAccent));
+            snackbar.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
             snackbar.show();
             return;
         } else{
