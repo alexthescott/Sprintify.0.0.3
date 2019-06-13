@@ -411,6 +411,7 @@ public class FilterActivity extends AppCompatActivity {
         protected List doInBackground(List... lists) {
             List playlistSongID = lists[0];
             StringBuilder sb = new StringBuilder();
+            seen = 0;
             for(int i = 0; i < Count; i++){
                 sb.append(playlistSongID.get(i));
                 sb.append(",");
@@ -429,17 +430,17 @@ public class FilterActivity extends AppCompatActivity {
                                 JSONArray audioFeatures = playlistJson.getJSONArray("audio_features");
                                 int currentCount = audioFeatures.length();
                                 for(int j = 0; j < currentCount; j++){
-                                    seen++;
-
                                     JSONObject features = audioFeatures.getJSONObject(j);
                                     double trackBPM = features.getDouble("tempo");
+                                    int actualIndex = i - seen + j;
+
                                     if(min < trackBPM && trackBPM < max){
                                         filteredBPMs.add(trackBPM);
-                                        filteredTrackIds.add(trackID.get(j));
-                                        filteredTrackName.add(trackName.get(j));
-                                        filterTrackImageURL.add(trackImageURL.get(j));
-                                        filterTrackArtists.add(trackArtist.get(j));
-                                        Log.d(trackName.get(j) + " is " + j , String.valueOf(trackBPM));
+                                        filteredTrackIds.add(trackID.get(actualIndex));
+                                        filteredTrackName.add(trackName.get(actualIndex));
+                                        filterTrackImageURL.add(trackImageURL.get(actualIndex));
+                                        filterTrackArtists.add(trackArtist.get(actualIndex));
+                                        Log.d(trackName.get(actualIndex) + " is " + actualIndex , String.valueOf(trackBPM));
                                     }
                                 }
 
@@ -451,8 +452,10 @@ public class FilterActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     sb = new StringBuilder();
+                    seen = 0;
+                } else{
+                    seen++;
                 }
-
             }
             return null;
         }
@@ -503,9 +506,6 @@ public class FilterActivity extends AppCompatActivity {
         percentfound = Math.round(percentfound);
         Log.d("Percent Found", String.valueOf(percentfound ));
         Toast.makeText(ctx, "Found " + size + " songs, " + percentfound + "% are in range", Toast.LENGTH_LONG).show();
-
-        double percentSeen = 100 * ((double) seen / (double) Count);
-        Log.d("Percent Looked At", String.valueOf(percentSeen));
     }
 
     private class ImageDownloader extends AsyncTask<Integer, Void, ByteArrayOutputStream> {
