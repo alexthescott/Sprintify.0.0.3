@@ -45,8 +45,15 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackHolder>
         trackHolder.trackTitle.setText(title);
         trackHolder.trackBPM.setText(String.valueOf(trackBPM.get(i)));
         byte[] imageByte = trackDB.getIMGByte((String) trackIds.get(i));
-        Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
-        trackHolder.trackImage.setImageBitmap(image);
+        if(imageByte != null){
+            Bitmap image = BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length);
+            trackHolder.trackImage.setImageBitmap(image);
+        } else{
+            boolean imageExists = trackDB.checkID(trackIds.get(i).toString());
+            Log.e("IMAGE ERROR", title + " " + imageExists);
+
+        }
+
     }
 
     @Override
