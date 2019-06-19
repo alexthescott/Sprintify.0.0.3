@@ -300,7 +300,7 @@ public class FilterActivity extends AppCompatActivity {
         protected void onPostExecute(JSONObject tracksOBJ) {
             super.onPostExecute(tracksOBJ);
             // Log.d("Tracks JSON", tracksOBJ.toString());
-            storeTrackInfo(tracksOBJ);
+            storeTrackInfo(tracksOBJ, 0);
             if(CountLeft > 0){ // more playlists to find
                 CountLeft = CountLeft - 100;
                 CountOffset = CountOffset + 100;
@@ -345,7 +345,7 @@ public class FilterActivity extends AppCompatActivity {
         protected void onPostExecute(JSONObject tracksOBJ) {
             super.onPostExecute(tracksOBJ);
             //Log.d("Tracks JSON", tracksOBJ.toString());
-            storeTrackInfo(tracksOBJ);
+            storeTrackInfo(tracksOBJ, CountOffset);
             if(CountLeft > 0){ // more playlists to find
                 CountLeft = CountLeft - 100;
                 CountOffset = CountOffset + 100;
@@ -363,12 +363,13 @@ public class FilterActivity extends AppCompatActivity {
 
     }
 
-    private void storeTrackInfo(JSONObject tracksOBJ) {
+    private void storeTrackInfo(JSONObject tracksOBJ, int OffSet) {
         try {
             JSONObject reader = new JSONObject(String.valueOf(tracksOBJ));
             JSONArray items = reader.getJSONArray("items");
 
             for(int i = 0; i < 100 && i < CountLeft; i++){
+                int newIndex = i + OffSet;
                 JSONObject track = items.getJSONObject(i);
                 JSONObject trackInfo = track.getJSONObject("track");
                 trackID.add(trackInfo.getString("id"));
@@ -376,22 +377,20 @@ public class FilterActivity extends AppCompatActivity {
                 trackArtist.add(trackInfo.getJSONArray("artists").getJSONObject(0).getString("name"));
                 trackImageURL.add(trackInfo.getJSONObject("album").getJSONArray("images").getJSONObject(2).getString("url"));
 
-                if (!(trackDB.checkID((String) trackID.get(i)))) {
+                if (!(trackDB.checkID((String) trackID.get(newIndex)))) {
                     ImageDownloader imageDownloader = new ImageDownloader();
                     try {
-                        ByteArrayOutputStream outputStream = imageDownloader.execute(i).get();
-                        Log.d("TrackTitle", String.valueOf(trackName.get(i)));
+                        ByteArrayOutputStream outputStream = imageDownloader.execute(newIndex).get();
+                        Log.d("TrackTitle", String.valueOf(trackName.get(newIndex)));
                         if (outputStream.toByteArray() != null) {
                             byte[] imageByte = outputStream.toByteArray();
-
-                            trackDB.insert((String) trackID.get(i), (String) trackImageURL.get(i), imageByte);
+                            trackDB.insert((String) trackID.get(newIndex), (String) trackImageURL.get(newIndex), imageByte);
                         }
                     } catch (ExecutionException e) {
                         e.printStackTrace();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    // Log.d("trackID " + (i + CountOffset), trackInfo.getString("id"));
                 }
             }
         } catch (JSONException e) {
