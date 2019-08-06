@@ -1,12 +1,13 @@
-###### To-Do:  
-##	Hot:    
-      1. playlist and track hovers
+Define a BPM floor and ceiling to filter a Spotify Playlist. Songs within range are kept.
 
-##  Medium:
-      1. post generate new playlist interface (reordering, audio preview)
-      2. hamburger menu to add logout and settings
-      3. generate brand new playlist feature
-      
-##  Mild:  
-      1. refresh button in action bar to check if new playlists are made    
-      2. create free spotify account to host pre-gen playlists
+# TO-DO
+Immediate:
+      Fix scrolling issues
+Future:
+      New AlertDialog to filter / generate
+      Fix swipe to delete
+      First time open demonstrate swipe to delete
+      Crop uploaded photos to a square
+      Pull to refresh
+      Rewrite main activity functions playlist view
+      Generate playlist with BPM range
